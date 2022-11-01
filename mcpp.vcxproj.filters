@@ -25,6 +25,12 @@
     <Filter Include="Source Files\World\Entity">
       <UniqueIdentifier>{a23fddf3-cf9c-4734-a7ea-bac58c3cd26d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{e20c0b4f-28c6-4180-abc2-9034a5c93dd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{40dd7569-e812-4d39-a192-7b96dcf4d72a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -54,14 +60,14 @@
     <ClCompile Include="src\world\world_renderer.cpp">
       <Filter>Source Files\World</Filter>
     </ClCompile>
-    <ClCompile Include="src\aabb.cpp">
-      <Filter>Source Files\World</Filter>
-    </ClCompile>
     <ClCompile Include="src\world\entity\player.cpp">
       <Filter>Source Files\World\Entity</Filter>
     </ClCompile>
     <ClCompile Include="src\world\entity\entity.cpp">
       <Filter>Source Files\World\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\aabb.cpp">
+      <Filter>Source Files\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -77,15 +83,6 @@
     <ClInclude Include="include\mcpp\glprogram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\mcpp\math_util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mcpp\matrix.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mcpp\vector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\mcpp\world\block.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
@@ -98,14 +95,23 @@
     <ClInclude Include="include\mcpp\world\world_renderer.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="include\mcpp\aabb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\mcpp\world\entity\entity.h">
       <Filter>Header Files\World\Entity</Filter>
     </ClInclude>
     <ClInclude Include="include\mcpp\world\entity\player.h">
       <Filter>Header Files\World\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\aabb.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\math_util.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\matrix.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\vector.h">
+      <Filter>Header Files\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
