@@ -13,6 +13,53 @@ mcpp::World::~World() {
     p_blocks = nullptr;
 }
 
+std::vector<mcpp::AABBox*> mcpp::World::getCubes(const AABBox& box, std::vector<AABBox*>& dest) {
+    int x0 = (int)box.minX;
+    int x1 = (int)(box.maxX + 1.0f);
+    int y0 = (int)box.minY;
+    int y1 = (int)(box.maxY + 1.0f);
+    int z0 = (int)box.minZ;
+    int z1 = (int)(box.maxZ + 1.0f);
+
+    if (x0 < 0) {
+        x0 = 0;
+    }
+    if (y0 < 0) {
+        y0 = 0;
+    }
+    if (z0 < 0) {
+        z0 = 0;
+    }
+
+    if (x1 > width) {
+        x1 = width;
+    }
+    if (y1 > height) {
+        y1 = height;
+    }
+    if (z1 > depth) {
+        z1 = depth;
+    }
+
+    for (int x = x0; x < x1; ++x) {
+        for (int y = y0; y < y1; ++y) {
+            for (int z = z0; z < z1; ++z) {
+                Block* block = getBlock(x, y, z);
+                AABBox* box = new AABBox();
+                block->getCollisionShape(*box);
+                if (box->isInvalid)
+                {
+                    box->move(x, y, z);
+                    dest.push_back(box);
+                }
+                else { delete box; }
+            }
+        }
+    }
+
+    return dest;
+}
+
 bool mcpp::World::setBlock(const Block* block, int x, int y, int z) {
     if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= depth)
     {

@@ -1,8 +1,9 @@
 #pragma once
-#include "mcpp/math_util.h"
+#include "mcpp/math/math_util.h"
 #include "mcpp/tessellator.h"
 
 namespace mcpp {
+    class AABBox;
     class World;
 
     namespace Blocks {
@@ -18,6 +19,8 @@ namespace mcpp {
 
         virtual unsigned char getTexture(Direction face);
 
+        virtual AABBox& getCollisionShape(AABBox& box);
+
         virtual bool hasSideTransparency(Direction face);
 
         bool shouldRenderFace(World* world, Direction face, int x, int y, int z);
@@ -30,6 +33,8 @@ namespace mcpp {
     class AirBlock : public Block {
     public:
         AirBlock(Blocks::T_blockId id);
+
+        virtual AABBox& getCollisionShape(AABBox& box) override;
 
         virtual bool hasSideTransparency(Direction face) override;
 

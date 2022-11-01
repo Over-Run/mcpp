@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "mcpp/glprogram.h"
-#include "mcpp/matrix.h"
+#include "mcpp/math/matrix.h"
 #include "mcpp/tessellator.h"
 #include "mcpp/texture.h"
 #include "mcpp/world/block.h"
@@ -131,24 +131,10 @@ void onCursorPos(GLFWwindow*, double xpos, double ypos) {
     deltaMouseY = ypos - lastMouseY;
     if (cameraMoving)
     {
-        player->yaw -= (float)mcpp::math::toRadians(deltaMouseX * MOUSE_SENSITIVITY);
-        if (player->yaw > mcpp::math::RAD180_f)
-        {
-            player->yaw -= mcpp::math::RAD360_f;
-        }
-        if (player->yaw < -mcpp::math::RAD180_f)
-        {
-            player->yaw += mcpp::math::RAD360_f;
-        }
-        player->pitch -= (float)mcpp::math::toRadians(deltaMouseY * MOUSE_SENSITIVITY);
-        if (player->pitch > mcpp::math::RAD90_f)
-        {
-            player->pitch = mcpp::math::RAD90_f;
-        }
-        else if (player->pitch < -mcpp::math::RAD90_f)
-        {
-            player->pitch = -mcpp::math::RAD90_f;
-        }
+        player->turn(
+            -(float)mcpp::math::toRadians(deltaMouseX * MOUSE_SENSITIVITY),
+            -(float)mcpp::math::toRadians(deltaMouseY * MOUSE_SENSITIVITY)
+        );
     }
     lastMouseX = xpos;
     lastMouseY = ypos;

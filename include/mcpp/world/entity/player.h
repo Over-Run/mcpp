@@ -1,6 +1,5 @@
 #pragma once
 #include "entity.h"
-#include "mcpp/vector.h"
 
 namespace mcpp {
     class Player : public Entity {

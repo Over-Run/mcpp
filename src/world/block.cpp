@@ -1,13 +1,17 @@
 #include "stdafx.h"
 #include "mcpp/texture.h"
 #include "mcpp/world/block.h"
-#include "mcpp/world/world.h" 
+#include "mcpp/world/world.h"
 
 mcpp::Block::Block(mcpp::Blocks::T_blockId _id) : id(_id) {
 }
 
 unsigned char mcpp::Block::getTexture(Direction face) {
     return id;
+}
+
+mcpp::AABBox& mcpp::Block::getCollisionShape(AABBox& box) {
+    return box.set(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 }
 
 bool mcpp::Block::hasSideTransparency(Direction face) {
@@ -94,6 +98,11 @@ mcpp::Blocks::T_blockId mcpp::Block::getId() const {
 }
 
 mcpp::AirBlock::AirBlock(mcpp::Blocks::T_blockId _id) : Block(_id) {
+}
+
+mcpp::AABBox& mcpp::AirBlock::getCollisionShape(AABBox& box) {
+    box.isInvalid = true;
+    return box;
 }
 
 bool mcpp::AirBlock::hasSideTransparency(Direction face) {

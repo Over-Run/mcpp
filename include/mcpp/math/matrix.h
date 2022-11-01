@@ -3,14 +3,14 @@
 namespace mcpp {
     template<typename T>
     struct Matrix4 {
+    private:
+        int properties;
     public:
         static constexpr int PROPERTY_PERSPECTIVE = 1 << 0;
         static constexpr int PROPERTY_AFFINE = 1 << 1;
         static constexpr int PROPERTY_IDENTITY = 1 << 2;
         static constexpr int PROPERTY_TRANSLATION = 1 << 3;
         static constexpr int PROPERTY_ORTHONORMAL = 1 << 4;
-
-        int properties;
         T m00, m01, m02, m03;
         T m10, m11, m12, m13;
         T m20, m21, m22, m23;

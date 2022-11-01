@@ -1,5 +1,5 @@
 #pragma once
-#include "mcpp/vector.h"
+#include "mcpp/math/vector.h"
 
 namespace mcpp {
     class AABBox;
@@ -17,7 +17,16 @@ namespace mcpp {
         Entity(World* world);
         virtual ~Entity();
 
-        void moveRelative(float xa, float za, float speed);
+        virtual void remove();
+
+        void turn(float yaw, float pitch);
+        void move(float x, float y, float z);
+        void moveRelative(float x, float z, float speed);
+
         virtual void tick();
+    protected:
+        void resetPos();
+        void setPos(float x, float y, float z);
+        void setSize(float w, float h);
     };
 }
