@@ -3,15 +3,15 @@
 #include "mcpp/matrix.h"
 
 namespace mcpp {
-    enum class gl_uniform_type : unsigned char {
+    enum class GLUniformType : unsigned char {
         I1,
         M4F
     };
 
-    struct gl_uniform {
+    struct GLUniform {
     private:
         bool dirty;
-        gl_uniform_type type;
+        GLUniformType type;
         int location, count;
         void* value;
 
@@ -19,22 +19,22 @@ namespace mcpp {
             dirty = true;
         }
     public:
-        gl_uniform(int location, gl_uniform_type type);
-        ~gl_uniform();
+        GLUniform(int location, GLUniformType type);
+        ~GLUniform();
 
         int getLocation() const;
         void set(int value);
-        void set(const mcpp::matrix4f& value);
+        void set(const mcpp::Matrix4f& value);
         void upload();
     };
 
-    class gl_program {
+    class GLProgram {
     private:
         unsigned int id;
-        std::map<std::string_view, gl_uniform*> uniforms;
+        std::map<std::string_view, GLUniform*> uniforms;
     public:
-        gl_program();
-        ~gl_program();
+        GLProgram();
+        ~GLProgram();
 
         void attachShader(unsigned int shader);
         void detachShader(unsigned int shader);
@@ -43,7 +43,7 @@ namespace mcpp {
         void getInfoLog(int bufSize, int* length, char* infoLog);
         void link();
         void use();
-        gl_uniform* findUniform(std::string_view name, gl_uniform_type type);
+        GLUniform* findUniform(std::string_view name, GLUniformType type);
         void uploadUniforms();
         unsigned int getId() const;
     };

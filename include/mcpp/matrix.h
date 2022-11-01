@@ -2,7 +2,7 @@
 
 namespace mcpp {
     template<typename T>
-    struct matrix4 {
+    struct Matrix4 {
     public:
         static constexpr int PROPERTY_PERSPECTIVE = 1 << 0;
         static constexpr int PROPERTY_AFFINE = 1 << 1;
@@ -16,14 +16,14 @@ namespace mcpp {
         T m20, m21, m22, m23;
         T m30, m31, m32, m33;
 
-        matrix4() :
+        Matrix4() :
             properties(PROPERTY_IDENTITY | PROPERTY_AFFINE | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL),
             m00(1), m01(0), m02(0), m03(0),
             m10(0), m11(1), m12(0), m13(0),
             m20(0), m21(0), m22(1), m23(0),
             m30(0), m31(0), m32(0), m33(1) {}
 
-        matrix4& identity() {
+        Matrix4& identity() {
             if ((properties & PROPERTY_IDENTITY) != 0)
             {
                 return *this;
@@ -48,7 +48,7 @@ namespace mcpp {
             m30 = 0; m31 = 0; m32 = 0; m33 = 1;
         }
 
-        matrix4& perspectiveGeneric(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne) {
+        Matrix4& perspectiveGeneric(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne) {
             T h = tan(fovy * 0.5f);
             // calculate right matrix elements
             T rm00 = 1.0f / (h * aspect);
@@ -97,7 +97,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& translateGeneric(T x, T y, T z) {
+        Matrix4& translateGeneric(T x, T y, T z) {
             m30 = fma(m00, x, fma(m10, y, fma(m20, z, m30)));
             m31 = fma(m01, x, fma(m11, y, fma(m21, z, m31)));
             m32 = fma(m02, x, fma(m12, y, fma(m22, z, m32)));
@@ -106,7 +106,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateGenericInternal(T ang, T x, T y, T z) {
+        Matrix4& rotateGenericInternal(T ang, T x, T y, T z) {
             T s = sin(ang);
             T c = cos(ang);
             T C = 1.0f - c;
@@ -150,7 +150,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotationInternal(T angle, T x, T y, T z) {
+        Matrix4& rotationInternal(T angle, T x, T y, T z) {
             T sin = ::sin(angle), cos = ::cos(angle);
             T C = 1.0f - cos, xy = x * y, xz = x * z, yz = y * z;
             if ((properties & PROPERTY_IDENTITY) == 0)
@@ -168,7 +168,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateGeneric(T ang, T x, T y, T z) {
+        Matrix4& rotateGeneric(T ang, T x, T y, T z) {
             if (y == 0.0 && z == 0.0 && abs(x) == 1.0)
                 return rotateX(x * ang);
             else if (x == 0.0 && z == 0.0 && abs(y) == 1.0)
@@ -178,7 +178,7 @@ namespace mcpp {
             return rotateGenericInternal(ang, x, y, z);
         }
 
-        matrix4& rotateTranslationInternal(T ang, T x, T y, T z) {
+        Matrix4& rotateTranslationInternal(T ang, T x, T y, T z) {
             T s = sin(ang);
             T c = cos(ang);
             T C = 1.0f - c;
@@ -214,7 +214,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateAffineInternal(T ang, T x, T y, T z) {
+        Matrix4& rotateAffineInternal(T ang, T x, T y, T z) {
             T s = sin(ang);
             T c = cos(ang);
             T C = 1.0f - c;
@@ -259,7 +259,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateXInternal(T ang) {
+        Matrix4& rotateXInternal(T ang) {
             T sin = ::sin(ang), cos = ::cos(ang);
             T lm10 = m10, lm11 = m11, lm12 = m12, lm13 = m13, lm20 = m20, lm21 = m21, lm22 = m22, lm23 = m23;
             m20 = fma(lm10, -sin, lm20 * cos);
@@ -274,7 +274,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateYInternal(T ang) {
+        Matrix4& rotateYInternal(T ang) {
             T sin = ::sin(ang);
             T cos = ::cos(ang);
             // add temporaries for dependent values
@@ -296,14 +296,14 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotateZInternal(T ang) {
+        Matrix4& rotateZInternal(T ang) {
             T sin = ::sin(ang);
             T cos = ::cos(ang);
             return rotateTowardsXY(sin, cos);
         }
 
     public:
-        matrix4& setPerspective(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne = false) {
+        Matrix4& setPerspective(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne = false) {
             zero();
             T h = tan(fovy * 0.5f);
             m00 = 1.0f / (h * aspect);
@@ -330,13 +330,13 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& perspective(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne = false) {
+        Matrix4& perspective(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne = false) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return setPerspective(fovy, aspect, zNear, zFar, zZeroToOne);
             return perspectiveGeneric(fovy, aspect, zNear, zFar, zZeroToOne);
         }
 
-        matrix4& translation(T x, T y, T z) {
+        Matrix4& translation(T x, T y, T z) {
             if ((properties & PROPERTY_IDENTITY) == 0)
                 _identity();
             m30 = x;
@@ -346,13 +346,13 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& translate(T x, T y, T z) {
+        Matrix4& translate(T x, T y, T z) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return translation(x, y, z);
             return translateGeneric(x, y, z);
         }
 
-        matrix4& setTranslation(T x, T y, T z) {
+        Matrix4& setTranslation(T x, T y, T z) {
             m30 = x;
             m31 = y;
             m32 = z;
@@ -360,7 +360,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotationX(T ang) {
+        Matrix4& rotationX(T ang) {
             T sin = ::sin(ang), cos = ::cos(ang);
             if ((properties & PROPERTY_IDENTITY) == 0)
                 _identity();
@@ -372,7 +372,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotationY(T ang) {
+        Matrix4& rotationY(T ang) {
             T sin = ::sin(ang), cos = ::cos(ang);
             if ((properties & PROPERTY_IDENTITY) == 0)
                 _identity();
@@ -384,7 +384,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotationZ(T ang) {
+        Matrix4& rotationZ(T ang) {
             T sin = ::sin(ang), cos = ::cos(ang);
             if ((properties & PROPERTY_IDENTITY) == 0)
                 _identity();
@@ -396,7 +396,7 @@ namespace mcpp {
             return *this;
         }
 
-        matrix4& rotation(T ang, T x, T y, T z) {
+        Matrix4& rotation(T ang, T x, T y, T z) {
             if (y == 0.0 && z == 0.0 && abs(x) == 1.0)
                 return rotationX(x * ang);
             else if (x == 0.0 && z == 0.0 && abs(y) == 1.0)
@@ -406,7 +406,7 @@ namespace mcpp {
             return rotationInternal(ang, x, y, z);
         }
 
-        matrix4& rotateTranslation(T ang, T x, T y, T z) {
+        Matrix4& rotateTranslation(T ang, T x, T y, T z) {
             T tx = m30, ty = m31, tz = m32;
             if (y == 0.0f && z == 0.0f && (abs(x)) == 1.0)
                 return rotationX(x * ang).setTranslation(tx, ty, tz);
@@ -417,7 +417,7 @@ namespace mcpp {
             return rotateTranslationInternal(ang, x, y, z);
         }
 
-        matrix4& rotateX(T ang) {
+        Matrix4& rotateX(T ang) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return rotationX(ang);
             else if ((properties & PROPERTY_TRANSLATION) != 0) {
@@ -427,7 +427,7 @@ namespace mcpp {
             return rotateXInternal(ang);
         }
 
-        matrix4& rotateY(T ang) {
+        Matrix4& rotateY(T ang) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return rotationY(ang);
             else if ((properties & PROPERTY_TRANSLATION) != 0) {
@@ -437,7 +437,7 @@ namespace mcpp {
             return rotateYInternal(ang);
         }
 
-        matrix4& rotateZ(T ang) {
+        Matrix4& rotateZ(T ang) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return rotationZ(ang);
             else if ((properties & PROPERTY_TRANSLATION) != 0) {
@@ -447,7 +447,7 @@ namespace mcpp {
             return rotateZInternal(ang);
         }
 
-        matrix4& rotateAffine(T ang, T x, T y, T z) {
+        Matrix4& rotateAffine(T ang, T x, T y, T z) {
             if (y == 0.0f && z == 0.0f && abs(x) == 1.0)
                 return rotateX(x * ang);
             else if (x == 0.0f && z == 0.0f && abs(y) == 1.0)
@@ -457,7 +457,7 @@ namespace mcpp {
             return rotateAffineInternal(ang, x, y, z);
         }
 
-        matrix4& rotate(T ang, T x, T y, T z) {
+        Matrix4& rotate(T ang, T x, T y, T z) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return rotation(ang, x, y, z);
             else if ((properties & PROPERTY_TRANSLATION) != 0)
@@ -467,7 +467,7 @@ namespace mcpp {
             return rotateGeneric(ang, x, y, z);
         }
 
-        matrix4& rotateTowardsXY(T dirX, T dirY) {
+        Matrix4& rotateTowardsXY(T dirX, T dirY) {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return rotationTowardsXY(dirX, dirY);
             T nm00 = fma(m00, dirY, m10 * dirX);
@@ -487,5 +487,5 @@ namespace mcpp {
         }
     };
 
-    using matrix4f = matrix4<float>;
+    using Matrix4f = Matrix4<float>;
 }

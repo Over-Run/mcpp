@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 namespace mcpp {
-    class tessellator {
+    class Tessellator {
     public:
         static constexpr int MEMORY_USE = 4 * 1024 * 1024;
         static constexpr int BUFFER_SIZE = MEMORY_USE / sizeof(float);
@@ -15,17 +15,23 @@ namespace mcpp {
         std::array<float, BUFFER_SIZE> buffer;
         std::vector<unsigned int> indices;
 
-        tessellator();
-        tessellator(const tessellator&) = delete;
+        Tessellator();
+        Tessellator(const Tessellator&) = delete;
     public:
-        static tessellator& getInstance();
+        static Tessellator& getInstance();
 
         void begin();
-        tessellator& vertex(float x, float y, float z);
-        tessellator& color(float r, float g, float b);
-        tessellator& texCoord(float u, float v);
-        tessellator& index(unsigned int numIndices, unsigned int...);
+        Tessellator& vertex(float x, float y, float z);
+        Tessellator& color(float r, float g, float b);
+        Tessellator& texCoord(float u, float v);
+        Tessellator& index(unsigned int numIndices, unsigned int...);
         void emit();
+
+        /// End tessellation.
+        ///
+        /// @param vao[in] the vao to be configured with the vertex attributes and ebo.
+        /// @param vaVertex[in,out,nullable] the vertex attribute status of vertex
+        /// @param indicesSize[in,out,notnull] the old indices size
         void end(unsigned int vao, unsigned int vbo, unsigned int ebo,
             bool* vaVertex, bool* vaColor, bool* vaTexCoord,
             size_t* bufferSize, size_t* indicesSize);

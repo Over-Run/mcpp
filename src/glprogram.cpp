@@ -1,15 +1,15 @@
 #include "stdafx.h"
 #include "mcpp/glprogram.h"
 
-mcpp::gl_uniform::gl_uniform(int _location, gl_uniform_type _type) :
+mcpp::GLUniform::GLUniform(int _location, GLUniformType _type) :
     dirty(true), type(_type), location(_location) {
     switch (_type)
     {
-    case mcpp::gl_uniform_type::I1:
+    case mcpp::GLUniformType::I1:
         count = 1;
         value = new int[1];
         break;
-    case mcpp::gl_uniform_type::M4F:
+    case mcpp::GLUniformType::M4F:
         count = 16;
         value = new float[16];
         break;
@@ -20,20 +20,20 @@ mcpp::gl_uniform::gl_uniform(int _location, gl_uniform_type _type) :
     }
 }
 
-mcpp::gl_uniform::~gl_uniform() {
+mcpp::GLUniform::~GLUniform() {
     delete[] value;
 }
 
-int mcpp::gl_uniform::getLocation() const {
+int mcpp::GLUniform::getLocation() const {
     return location;
 }
 
-void mcpp::gl_uniform::set(int _value) {
+void mcpp::GLUniform::set(int _value) {
     *(int*)value = _value;
     markDirty();
 }
 
-void mcpp::gl_uniform::set(const mcpp::matrix4f& _value) {
+void mcpp::GLUniform::set(const mcpp::Matrix4f& _value) {
     float* p_Value = (float*)value;
     p_Value[0] = _value.m00;
     p_Value[1] = _value.m01;
@@ -54,14 +54,14 @@ void mcpp::gl_uniform::set(const mcpp::matrix4f& _value) {
     markDirty();
 }
 
-void mcpp::gl_uniform::upload() {
+void mcpp::GLUniform::upload() {
     if (!dirty) { return; }
     switch (type)
     {
-    case gl_uniform_type::I1:
+    case GLUniformType::I1:
         glUniform1i(location, *((int*)value));
         break;
-    case mcpp::gl_uniform_type::M4F:
+    case mcpp::GLUniformType::M4F:
         glUniformMatrix4fv(location, 1, false, (float*)value);
         break;
     default:
@@ -70,60 +70,60 @@ void mcpp::gl_uniform::upload() {
     dirty = false;
 }
 
-mcpp::gl_program::gl_program() : id(glCreateProgram()) {}
+mcpp::GLProgram::GLProgram() : id(glCreateProgram()) {}
 
-mcpp::gl_program::~gl_program() {
+mcpp::GLProgram::~GLProgram() {
     glDeleteProgram(id);
     for (auto& u : uniforms) {
         delete u.second;
     }
 }
 
-void mcpp::gl_program::use() {
+void mcpp::GLProgram::use() {
     glUseProgram(id);
 }
 
-void mcpp::gl_program::attachShader(unsigned int shader) {
+void mcpp::GLProgram::attachShader(unsigned int shader) {
     glAttachShader(id, shader);
 }
 
-void mcpp::gl_program::detachShader(unsigned int shader) {
+void mcpp::GLProgram::detachShader(unsigned int shader) {
     glDetachShader(id, shader);
 }
 
-void mcpp::gl_program::bindAttribLocation(unsigned int index, const char* name) {
+void mcpp::GLProgram::bindAttribLocation(unsigned int index, const char* name) {
     glBindAttribLocation(id, index, name);
 }
 
-void mcpp::gl_program::getiv(unsigned int pname, int* params) {
+void mcpp::GLProgram::getiv(unsigned int pname, int* params) {
     glGetProgramiv(id, pname, params);
 }
 
-void mcpp::gl_program::getInfoLog(int bufSize, int* length, char* infoLog) {
+void mcpp::GLProgram::getInfoLog(int bufSize, int* length, char* infoLog) {
     glGetProgramInfoLog(id, bufSize, length, infoLog);
 }
 
-void mcpp::gl_program::link() {
+void mcpp::GLProgram::link() {
     glLinkProgram(id);
 }
 
-mcpp::gl_uniform* mcpp::gl_program::findUniform(std::string_view name, gl_uniform_type type) {
+mcpp::GLUniform* mcpp::GLProgram::findUniform(std::string_view name, GLUniformType type) {
     const auto& it = uniforms.find(name);
     if (it == uniforms.end())
     {
-        gl_uniform* uniform = new gl_uniform(glGetUniformLocation(id, name.data()), type);
+        GLUniform* uniform = new GLUniform(glGetUniformLocation(id, name.data()), type);
         uniforms[name] = uniform;
         return uniform;
     }
     return uniforms[name];
 }
 
-void mcpp::gl_program::uploadUniforms() {
+void mcpp::GLProgram::uploadUniforms() {
     for (auto& u : uniforms) {
         u.second->upload();
     }
 }
 
-unsigned int mcpp::gl_program::getId() const {
+unsigned int mcpp::GLProgram::getId() const {
     return id;
 }

@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\World">
+      <UniqueIdentifier>{acdfecb8-955f-4071-a0eb-250a1b9be4e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World">
+      <UniqueIdentifier>{74eaf094-9c38-4995-89ba-803a903ddd2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World\Entity">
+      <UniqueIdentifier>{6dffd90c-2445-4ef9-a2ff-348a0fc440b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World\Entity">
+      <UniqueIdentifier>{a23fddf3-cf9c-4734-a7ea-bac58c3cd26d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -24,24 +36,36 @@
     <ClCompile Include="src\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\tessellator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\glprogram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\player.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\world\block.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\chunk.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\world.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\world_renderer.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\aabb.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\entity\player.cpp">
+      <Filter>Source Files\World\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\entity\entity.cpp">
+      <Filter>Source Files\World\Entity</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mcpp\block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\mcpp\texture.h">
@@ -59,14 +83,29 @@
     <ClInclude Include="include\mcpp\matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\mcpp\player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\mcpp\vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\mcpp\world.h">
+    <ClInclude Include="include\mcpp\world\block.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\world\chunk.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\world\world.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\world\world_renderer.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\aabb.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\world\entity\entity.h">
+      <Filter>Header Files\World\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\world\entity\player.h">
+      <Filter>Header Files\World\Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

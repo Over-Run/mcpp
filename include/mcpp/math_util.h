@@ -1,9 +1,76 @@
 #pragma once
 
 namespace mcpp {
-    enum class direction : unsigned char {
+    enum class Direction : unsigned char {
         WEST, EAST, DOWN, UP, NORTH, SOUTH
     };
+
+    inline constexpr int dirOffsetX(Direction dir) {
+        switch (dir)
+        {
+        case mcpp::Direction::WEST:
+            return -1;
+        case mcpp::Direction::EAST:
+            return 1;
+        case mcpp::Direction::DOWN:
+        case mcpp::Direction::UP:
+        case mcpp::Direction::NORTH:
+        case mcpp::Direction::SOUTH:
+        default:
+            return 0;
+        }
+    }
+
+    inline constexpr int dirOffsetY(Direction dir) {
+        switch (dir)
+        {
+        case mcpp::Direction::DOWN:
+            return -1;
+        case mcpp::Direction::UP:
+            return 1;
+        case mcpp::Direction::WEST:
+        case mcpp::Direction::EAST:
+        case mcpp::Direction::NORTH:
+        case mcpp::Direction::SOUTH:
+        default:
+            return 0;
+        }
+    }
+
+    inline constexpr int dirOffsetZ(Direction dir) {
+        switch (dir)
+        {
+        case mcpp::Direction::NORTH:
+            return -1;
+        case mcpp::Direction::SOUTH:
+            return 1;
+        case mcpp::Direction::WEST:
+        case mcpp::Direction::EAST:
+        case mcpp::Direction::DOWN:
+        case mcpp::Direction::UP:
+        default:
+            return 0;
+        }
+    }
+
+    inline constexpr Direction dirOpposite(Direction dir) {
+        switch (dir)
+        {
+        case mcpp::Direction::WEST:
+            return Direction::EAST;
+        case mcpp::Direction::EAST:
+            return Direction::WEST;
+        case mcpp::Direction::DOWN:
+            return Direction::UP;
+        case mcpp::Direction::UP:
+            return Direction::DOWN;
+        case mcpp::Direction::NORTH:
+            return Direction::SOUTH;
+        case mcpp::Direction::SOUTH:
+        default:
+            return Direction::NORTH;
+        }
+    }
 
     namespace math {
         constexpr float PI_f = 3.1415927f;
@@ -16,8 +83,8 @@ namespace mcpp {
         constexpr double RAD360_d = PI_d * 2.0;
 
         template<typename T, typename T_delta>
-        inline T lerp(T x0, T x1, T_delta delta) {
-            return x0 + (x1 - x0) * (T)delta;
+        inline T_delta lerp(T x0, T x1, T_delta delta) {
+            return (T_delta)(x0 + (x1 - x0) * delta);
         }
 
         inline constexpr float toRadians(float deg) {

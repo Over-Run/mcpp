@@ -1,14 +1,17 @@
 #include "stdafx.h"
-#include "mcpp/block.h"
 #include "mcpp/glprogram.h"
 #include "mcpp/matrix.h"
-#include "mcpp/player.h"
 #include "mcpp/tessellator.h"
 #include "mcpp/texture.h"
+#include "mcpp/world/block.h"
+#include "mcpp/world/chunk.h"
+#include "mcpp/world/entity/player.h"
+#include "mcpp/world/world.h"
+#include "mcpp/world/world_renderer.h"
 
 GLFWwindow* window = NULL;
 int width = 0, height = 0;
-mcpp::gl_program* program = nullptr;
+mcpp::GLProgram* program = nullptr;
 unsigned int vao = 0, vbo = 0, ebo = 0;
 size_t bufferSize = 0, indicesSize = 0;
 bool vaVertex = false, vaColor = false, vaTexCoord = false;
@@ -19,13 +22,17 @@ double deltaMouseX = 0.0, deltaMouseY = 0.0;
 double lastMouseX = 0.0, lastMouseY = 0.0;
 bool cameraMoving = false;
 
-mcpp::matrix4f projectionMat = mcpp::matrix4f();
-mcpp::matrix4f viewMat = mcpp::matrix4f();
-mcpp::matrix4f modelMat = mcpp::matrix4f();
+mcpp::Matrix4f projectionMat = mcpp::Matrix4f();
+mcpp::Matrix4f viewMat = mcpp::Matrix4f();
+mcpp::Matrix4f modelMat = mcpp::Matrix4f();
 
-mcpp::player* player = nullptr;
+mcpp::World* world = nullptr;
+mcpp::WorldRenderer* worldRenderer = nullptr;
+mcpp::Player* player = nullptr;
 
-class timer {
+unsigned int frames = 0;
+
+class Timer {
 public:
     int ticks;
     int maxTicks;
@@ -37,7 +44,7 @@ public:
     double tps;
     double timescale;
 
-    timer(double _tps, int _maxTicks = 100) :
+    Timer(double _tps, int _maxTicks = 100) :
         ticks(0), maxTicks(_maxTicks),
         lastTime(0.0), passedTime(0.0),
         deltaFrameTime(0.0), partialTick(0.0),
@@ -59,7 +66,7 @@ public:
     }
 };
 
-timer gameTimer = timer(20.0);
+Timer gameTimer = Timer(20.0);
 
 constexpr auto& vertexShader = R"glsl(
 #version 150 core
@@ -167,7 +174,7 @@ unsigned int compileShader(int type, const char* src) {
 }
 
 bool initProgram() {
-    program = new mcpp::gl_program();
+    program = new mcpp::GLProgram();
     unsigned int vsh = compileShader(GL_VERTEX_SHADER, vertexShader);
     if (vsh == 0)
     {
@@ -203,7 +210,7 @@ bool initProgram() {
     glDeleteShader(fsh);
 
     program->use();
-    program->findUniform("Sampler0", mcpp::gl_uniform_type::I1)->set(0);
+    program->findUniform("Sampler0", mcpp::GLUniformType::I1)->set(0);
     glUseProgram(0);
 
     return true;
@@ -265,7 +272,32 @@ bool init() {
         }
     }
 
-    player = new mcpp::player();
+    world = new mcpp::World(256, 64, 256);
+    worldRenderer = new mcpp::WorldRenderer(world);
+    for (int x = 0; x < world->getWidth(); x++)
+    {
+        for (int z = 0; z < world->getDepth(); z++)
+        {
+            for (int y = 0; y < world->getHeight(); y++)
+            {
+                mcpp::Block* p_block = mcpp::Blocks::AIR;
+                if (y == 8)
+                {
+                    p_block = mcpp::Blocks::GRASS_BLOCK;
+                }
+                else if (y > 4 && y < 8)
+                {
+                    p_block = mcpp::Blocks::DIRT;
+                }
+                else if (y <= 4)
+                {
+                    p_block = mcpp::Blocks::COBBLESTONE;
+                }
+                world->setBlock(p_block, x, y, z);
+            }
+        }
+    }
+    player = new mcpp::Player(world);
 
     return true;
 }
@@ -284,7 +316,7 @@ void update() {
 }
 
 void moveCameraToPlayer(double partialTick) {
-    mcpp::vector3f lerpPos = mcpp::vector3f();
+    mcpp::Vector3f lerpPos = mcpp::Vector3f();
     player->prevPosition.lerp(player->position, partialTick, lerpPos);
     viewMat.translate(0.0f, 0.0f, -0.3f)
         .rotateX(-player->pitch)
@@ -301,31 +333,29 @@ void setupCamera(double partialTick) {
 void render(double partialTick) {
     setupCamera(partialTick);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    worldRenderer->updateDirtyChunks();
+
     program->use();
-    program->findUniform("ProjectionMat", mcpp::gl_uniform_type::M4F)->set(projectionMat);
-    program->findUniform("ViewMat", mcpp::gl_uniform_type::M4F)->set(viewMat);
-    program->findUniform("ModelMat", mcpp::gl_uniform_type::M4F)->set(modelMat);
+    program->findUniform("ProjectionMat", mcpp::GLUniformType::M4F)->set(projectionMat);
+    program->findUniform("ViewMat", mcpp::GLUniformType::M4F)->set(viewMat);
+    program->findUniform("ModelMat", mcpp::GLUniformType::M4F)->set(modelMat);
     program->uploadUniforms();
     mcpp::texture::bind2D(0, terrainAtlas);
-    auto& t = mcpp::tessellator::getInstance();
-    t.begin();
-    t.color(1.0f, 1.0f, 1.0f);
-    mcpp::blocks::GRASS_BLOCK.render(t, 0, 0, 0);
-    mcpp::blocks::GRASS_BLOCK.render(t, -1, 0, 0);
-    mcpp::blocks::GRASS_BLOCK.render(t, 0, -1, 0);
-    mcpp::blocks::GRASS_BLOCK.render(t, -1, -1, 0);
-    t.end(vao, vbo, ebo, &vaVertex, &vaColor, &vaTexCoord, &bufferSize, &indicesSize);
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, (GLsizei)indicesSize, GL_UNSIGNED_INT, (void*)0);
-    glBindVertexArray(0);
+    worldRenderer->render();
     mcpp::texture::bind2D(0, 0);
     glUseProgram(0);
+
     glfwSwapBuffers(window);
 }
 
 void dispose() {
     delete player;
-    player = nullptr;
+    player = nullptr; 
+    delete world;
+    world = nullptr;
+    delete worldRenderer;
+    worldRenderer = nullptr;
 
     delete program;
     program = nullptr;
@@ -380,10 +410,20 @@ int WINAPI WinMain(
         return 0;
     }
     glfwShowWindow(window);
+    unsigned int frames = 0;
+    double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         update();
         render(gameTimer.partialTick);
+        ++frames;
+        while (glfwGetTime() >= lastTime + 1.0)
+        {
+            std::cout << "FPS: " << frames << "\n";;
+            ::frames = frames;
+            lastTime += 1.0;
+            frames = 0;
+        }
     }
     dispose();
     glfwDestroyWindow(window);

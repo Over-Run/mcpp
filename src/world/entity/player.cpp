@@ -1,29 +1,10 @@
 #include "stdafx.h"
-#include "mcpp/player.h"
+#include "mcpp/world/entity/player.h"
 
-mcpp::player::player() :
-    onGround(false), removed(false),
-    yaw(0.0f), pitch(0.0f),
-    bbWidth(0.6f), bbHeight(1.8f),
-    prevPosition(vector3f()),
-    position(vector3f()),
-    velocity(vector3f()) {}
+mcpp::Player::Player(World* world) : Entity(world) {}
 
-void mcpp::player::moveRelative(float xa, float za, float speed) {
-    float dist = xa * xa + za * za;
-    if (dist >= 0.01) {
-        dist = speed / sqrt(dist);
-        xa *= dist;
-        za *= dist;
-        float sin = ::sin(-yaw);
-        float cos = ::cos(-yaw);
-        velocity.x += xa * cos - za * sin;
-        velocity.z += za * cos + xa * sin;
-    }
-}
-
-void mcpp::player::tick() {
-    prevPosition.set(position);
+void mcpp::Player::tick() {
+    Entity::tick();
     float xo = 0.0f, yo = 0.0f, zo = 0.0f;
     // TODO: Replace this with keyboard::isKeyDown
     GLFWwindow* window = glfwGetCurrentContext();

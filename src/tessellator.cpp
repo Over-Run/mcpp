@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "mcpp/tessellator.h"
 
-mcpp::tessellator::tessellator() :
+mcpp::Tessellator::Tessellator() :
     r(0), g(0), b(0),
     hasColor(false), hasTexture(false),
     stride(sizeof(float) * 3), pos(0), vertexCount(0),
@@ -9,25 +9,25 @@ mcpp::tessellator::tessellator() :
     u(0.0f), v(0.0f),
     buffer{ 0.0f } {}
 
-mcpp::tessellator& mcpp::tessellator::getInstance() {
-    static tessellator t;
+mcpp::Tessellator& mcpp::Tessellator::getInstance() {
+    static Tessellator t;
     return t;
 }
 
-void mcpp::tessellator::begin() {
+void mcpp::Tessellator::begin() {
     pos = 0;
     vertexCount = 0;
     indices.clear();
 }
 
-mcpp::tessellator& mcpp::tessellator::vertex(float _x, float _y, float _z) {
+mcpp::Tessellator& mcpp::Tessellator::vertex(float _x, float _y, float _z) {
     x = _x;
     y = _y;
     z = _z;
     return *this;
 }
 
-mcpp::tessellator& mcpp::tessellator::color(float _r, float _g, float _b) {
+mcpp::Tessellator& mcpp::Tessellator::color(float _r, float _g, float _b) {
     r = _r;
     g = _g;
     b = _b;
@@ -39,7 +39,7 @@ mcpp::tessellator& mcpp::tessellator::color(float _r, float _g, float _b) {
     return *this;
 }
 
-mcpp::tessellator& mcpp::tessellator::texCoord(float _u, float _v) {
+mcpp::Tessellator& mcpp::Tessellator::texCoord(float _u, float _v) {
     u = _u;
     v = _v;
     if (!hasTexture)
@@ -50,7 +50,7 @@ mcpp::tessellator& mcpp::tessellator::texCoord(float _u, float _v) {
     return *this;
 }
 
-mcpp::tessellator& mcpp::tessellator::index(unsigned int numIndices, unsigned int...) {
+mcpp::Tessellator& mcpp::Tessellator::index(unsigned int numIndices, unsigned int...) {
     va_list args;
     va_start(args, numIndices);
     for (unsigned int i = 0; i < numIndices; i++)
@@ -62,7 +62,7 @@ mcpp::tessellator& mcpp::tessellator::index(unsigned int numIndices, unsigned in
     return *this;
 }
 
-void mcpp::tessellator::emit() {
+void mcpp::Tessellator::emit() {
     buffer[pos++] = x;
     buffer[pos++] = y;
     buffer[pos++] = z;
@@ -80,11 +80,7 @@ void mcpp::tessellator::emit() {
     ++vertexCount;
 }
 
-/// End tessellation.
-/// @param vao[in] the vao to be configured with the vertex attributes and ebo.
-/// @param vaVertex[in,out,nullable] the vertex attribute status of vertex
-/// @param indicesSize[in,out,notnull] the old indices size
-void mcpp::tessellator::end(unsigned int vao, unsigned int vbo, unsigned int ebo, 
+void mcpp::Tessellator::end(unsigned int vao, unsigned int vbo, unsigned int ebo,
     bool* vaVertex, bool* vaColor, bool* vaTexCoord,
     size_t* bufferSize, size_t* indicesSize) {
     bool noVbo = !glIsBuffer(vbo), noEbo = !glIsBuffer(ebo);

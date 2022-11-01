@@ -147,24 +147,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\block.cpp" />
+    <ClCompile Include="src\aabb.cpp" />
     <ClCompile Include="src\ext_lib_impl.cpp" />
     <ClCompile Include="src\glprogram.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\tessellator.cpp" />
     <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\world\block.cpp" />
+    <ClCompile Include="src\world\chunk.cpp" />
+    <ClCompile Include="src\world\entity\entity.cpp" />
+    <ClCompile Include="src\world\entity\player.cpp" />
+    <ClCompile Include="src\world\world.cpp" />
+    <ClCompile Include="src\world\world_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\mcpp\block.h" />
+    <ClInclude Include="include\mcpp\aabb.h" />
     <ClInclude Include="include\mcpp\glprogram.h" />
     <ClInclude Include="include\mcpp\math_util.h" />
     <ClInclude Include="include\mcpp\matrix.h" />
-    <ClInclude Include="include\mcpp\player.h" />
     <ClInclude Include="include\mcpp\tessellator.h" />
     <ClInclude Include="include\mcpp\texture.h" />
     <ClInclude Include="include\mcpp\vector.h" />
-    <ClInclude Include="include\mcpp\world.h" />
+    <ClInclude Include="include\mcpp\world\block.h" />
+    <ClInclude Include="include\mcpp\world\chunk.h" />
+    <ClInclude Include="include\mcpp\world\entity\entity.h" />
+    <ClInclude Include="include\mcpp\world\entity\player.h" />
+    <ClInclude Include="include\mcpp\world\world.h" />
+    <ClInclude Include="include\mcpp\world\world_renderer.h" />
     <ClInclude Include="include\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
