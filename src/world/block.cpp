@@ -28,7 +28,7 @@ void mcpp::Block::renderFace(Tessellator& t, World* world, Direction face, int x
     float u0 = 0.0f, v0 = 0.0f, u1 = 0.0f, v1 = 0.0f;
     unsigned char texture = getTexture(face);
     texture::atlasUV((texture % 16) * 16, (texture / 16) * 16, 16, 16, &u0, &v0, &u1, &v1);
-    t.index(6, 0, 1, 2, 2, 3, 0);
+    t.index({ 0, 1, 2, 2, 3, 0 });
     switch (face)
     {
     case mcpp::Direction::WEST:

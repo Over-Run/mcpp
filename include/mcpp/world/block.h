@@ -3,7 +3,7 @@
 #include "mcpp/tessellator.h"
 
 namespace mcpp {
-    class AABBox;
+    struct AABBox;
     class World;
 
     namespace Blocks {

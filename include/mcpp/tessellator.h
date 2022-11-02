@@ -24,7 +24,7 @@ namespace mcpp {
         Tessellator& vertex(float x, float y, float z);
         Tessellator& color(float r, float g, float b);
         Tessellator& texCoord(float u, float v);
-        Tessellator& index(unsigned int numIndices, unsigned int...);
+        Tessellator& index(std::initializer_list<unsigned int> indexList);
         void emit();
 
         /// End tessellation.

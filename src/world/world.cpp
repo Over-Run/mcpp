@@ -4,8 +4,9 @@
 mcpp::World::World(int _width, int _height, int _depth) :
     width(_width),
     height(_height),
-    depth(_depth) {
-    p_blocks = new Blocks::T_blockId[_width * _height * _depth];
+    depth(_depth),
+    p_blocks(new Blocks::T_blockId[_width * _height * _depth]),
+    listeners(std::vector<IWorldListener*>()) {
 }
 
 mcpp::World::~World() {
@@ -13,7 +14,7 @@ mcpp::World::~World() {
     p_blocks = nullptr;
 }
 
-std::vector<mcpp::AABBox*> mcpp::World::getCubes(const AABBox& box, std::vector<AABBox*>& dest) {
+std::vector<mcpp::AABBox*>& mcpp::World::getCubes(const AABBox& box, std::vector<AABBox*>& dest) {
     int x0 = (int)box.minX;
     int x1 = (int)(box.maxX + 1.0f);
     int y0 = (int)box.minY;
@@ -47,9 +48,9 @@ std::vector<mcpp::AABBox*> mcpp::World::getCubes(const AABBox& box, std::vector<
                 Block* block = getBlock(x, y, z);
                 AABBox* box = new AABBox();
                 block->getCollisionShape(*box);
-                if (box->isInvalid)
+                if (!box->isInvalid)
                 {
-                    box->move(x, y, z);
+                    box->move((float)x, (float)y, (float)z);
                     dest.push_back(box);
                 }
                 else { delete box; }

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "mcpp/matrix.h"
+#include "mcpp/math/matrix.h"
 
 namespace mcpp {
     enum class GLUniformType : unsigned char {

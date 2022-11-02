@@ -303,6 +303,105 @@ namespace mcpp {
         }
 
     public:
+        Matrix4& set(const Matrix4& m) {
+            m00 = m.m00;
+            m01 = m.m01;
+            m02 = m.m02;
+            m03 = m.m03;
+            m10 = m.m10;
+            m11 = m.m11;
+            m12 = m.m12;
+            m13 = m.m13;
+            m20 = m.m20;
+            m21 = m.m21;
+            m22 = m.m22;
+            m23 = m.m23;
+            m30 = m.m30;
+            m31 = m.m31;
+            m32 = m.m32;
+            m33 = m.m33;
+            properties = m.properties;
+            return *this;
+        }
+
+        Matrix4& mulTranslationAffine(const Matrix4& right, Matrix4& dest) {
+            dest.m00 = right.m00;
+            dest.m01 = right.m01;
+            dest.m02 = right.m02;
+            dest.m03 = m03;
+            dest.m10 = right.m10;
+            dest.m11 = right.m11;
+            dest.m12 = right.m12;
+            dest.m13 = m13;
+            dest.m20 = right.m20;
+            dest.m21 = right.m21;
+            dest.m22 = right.m22;
+            dest.m23 = m23;
+            dest.m30 = right.m30 + m30;
+            dest.m31 = right.m31 + m31;
+            dest.m32 = right.m32 + m32;
+            dest.m33 = m33;
+            dest.properties = PROPERTY_AFFINE | (right.properties & PROPERTY_ORTHONORMAL);
+            return dest;
+        }
+
+        Matrix4& mulAffine(const Matrix4& right, Matrix4& dest) {
+            T m00 = Matrix4::m00, m01 = Matrix4::m01, m02 = Matrix4::m02;
+            T m10 = Matrix4::m10, m11 = Matrix4::m11, m12 = Matrix4::m12;
+            T m20 = Matrix4::m20, m21 = Matrix4::m21, m22 = Matrix4::m22;
+            T rm00 = right.m00, rm01 = right.m01, rm02 = right.m02;
+            T rm10 = right.m10, rm11 = right.m11, rm12 = right.m12;
+            T rm20 = right.m20, rm21 = right.m21, rm22 = right.m22;
+            T rm30 = right.m30, rm31 = right.m31, rm32 = right.m32;
+            dest.m00 = fma(m00, rm00, fma(m10, rm01, m20 * rm02));
+            dest.m01 = fma(m01, rm00, fma(m11, rm01, m21 * rm02));
+            dest.m02 = fma(m02, rm00, fma(m12, rm01, m22 * rm02));
+            dest.m03 = m03;
+            dest.m10 = fma(m00, rm10, fma(m10, rm11, m20 * rm12));
+            dest.m11 = fma(m01, rm10, fma(m11, rm11, m21 * rm12));
+            dest.m12 = fma(m02, rm10, fma(m12, rm11, m22 * rm12));
+            dest.m13 = m13;
+            dest.m20 = fma(m00, rm20, fma(m10, rm21, m20 * rm22));
+            dest.m21 = fma(m01, rm20, fma(m11, rm21, m21 * rm22));
+            dest.m22 = fma(m02, rm20, fma(m12, rm21, m22 * rm22));
+            dest.m23 = m23;
+            dest.m30 = fma(m00, rm30, fma(m10, rm31, fma(m20, rm32, m30)));
+            dest.m31 = fma(m01, rm30, fma(m11, rm31, fma(m21, rm32, m31)));
+            dest.m32 = fma(m02, rm30, fma(m12, rm31, fma(m22, rm32, m32)));
+            dest.m33 = m33;
+            dest.properties = PROPERTY_AFFINE | (properties & right.properties & PROPERTY_ORTHONORMAL);
+            return dest;
+        }
+
+        Matrix4& mulPerspectiveAffine(const Matrix4& view, Matrix4& dest) {
+            T nm00 = m00 * view.m00, nm01 = m11 * view.m01, nm02 = m22 * view.m02, nm03 = m23 * view.m02;
+            T nm10 = m00 * view.m10, nm11 = m11 * view.m11, nm12 = m22 * view.m12, nm13 = m23 * view.m12;
+            T nm20 = m00 * view.m20, nm21 = m11 * view.m21, nm22 = m22 * view.m22, nm23 = m23 * view.m22;
+            T nm30 = m00 * view.m30, nm31 = m11 * view.m31, nm32 = m22 * view.m32 + m32, nm33 = m23 * view.m32;
+            dest.m00 = nm00; dest.m01 = nm01; dest.m02 = nm02; dest.m03 = nm03;
+            dest.m10 = nm10; dest.m11 = nm11; dest.m12 = nm12; dest.m13 = nm13;
+            dest.m20 = nm20; dest.m21 = nm21; dest.m22 = nm22; dest.m23 = nm23;
+            dest.m30 = nm30; dest.m31 = nm31; dest.m32 = nm32; dest.m33 = nm33;
+            dest.properties = 0;
+            return dest;
+        }
+
+        Matrix4& mul(const Matrix4& right, Matrix4& dest) {
+            if ((properties & PROPERTY_IDENTITY) != 0)
+                return dest.set(right);
+            else if ((right.properties() & PROPERTY_IDENTITY) != 0)
+                return dest.set(*this);
+            else if ((properties & PROPERTY_TRANSLATION) != 0 && (right.properties & PROPERTY_AFFINE) != 0)
+                return mulTranslationAffine(right, dest);
+            else if ((properties & PROPERTY_AFFINE) != 0 && (right.properties & PROPERTY_AFFINE) != 0)
+                return mulAffine(right, dest);
+            else if ((properties & PROPERTY_PERSPECTIVE) != 0 && (right.properties & PROPERTY_AFFINE) != 0)
+                return mulPerspectiveAffine(right, dest);
+            else if ((right.properties & PROPERTY_AFFINE) != 0)
+                return mulAffineR(right, dest);
+            return mul0(right, dest);
+        }
+
         Matrix4& setPerspective(T fovy, T aspect, T zNear, T zFar, bool zZeroToOne = false) {
             zero();
             T h = tan(fovy * 0.5f);

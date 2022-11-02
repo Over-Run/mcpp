@@ -7,6 +7,7 @@ mcpp::Entity::Entity(World* _world) :
     onGround(false), removed(false),
     yaw(0.0f), pitch(0.0f),
     bbWidth(0.6f), bbHeight(1.8f),
+    eyeHeight(0.0f),
     world(_world),
     bb(nullptr),
     prevPosition(Vector3f()),
@@ -45,6 +46,10 @@ void mcpp::Entity::turn(float _yaw, float _pitch) {
     }
 }
 
+void mcpp::Entity::move(const Vector3f& xyz) {
+    move(xyz.x, xyz.y, xyz.z);
+}
+
 void mcpp::Entity::move(float x, float y, float z) {
     float xaOrg = x;
     float yaOrg = y;
@@ -67,6 +72,10 @@ void mcpp::Entity::move(float x, float y, float z) {
         z = _box->clipZCollide(*bb, z);
     }
     bb->move(0.0f, 0.0f, z);
+
+    for (auto& _box : boxes) {
+        delete _box;
+    }
 
     onGround = yaOrg != y && yaOrg < 0.0f;
 
@@ -94,4 +103,26 @@ void mcpp::Entity::moveRelative(float x, float z, float speed) {
 
 void mcpp::Entity::tick() {
     prevPosition.set(position);
+}
+
+void mcpp::Entity::resetPos() {
+    srand((unsigned int)time(nullptr));
+    float x = (float)rand() / RAND_MAX * world->getWidth();
+    float y = (float)(world->getHeight() + 10);
+    srand((unsigned int)time(nullptr));
+    float z = (float)rand() / RAND_MAX * world->getDepth();
+    setPos(x, y, z);
+}
+
+void mcpp::Entity::setPos(float x, float y, float z) {
+    position.set(x, y, z);
+    float w = bbWidth * 0.5f;
+    delete bb;
+    bb = new AABBox();
+    bb->set(x - w, y, z - w, x + w, y + bbHeight, z + w);
+}
+
+void mcpp::Entity::setSize(float w, float h) {
+    bbWidth = w;
+    bbHeight = h;
 }

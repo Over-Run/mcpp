@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mcpp/glprogram.h"
 #include "mcpp/math/matrix.h"
+#include "mcpp/math/frustum.h"
 #include "mcpp/tessellator.h"
 #include "mcpp/texture.h"
 #include "mcpp/world/block.h"
@@ -29,6 +30,8 @@ mcpp::Matrix4f modelMat = mcpp::Matrix4f();
 mcpp::World* world = nullptr;
 mcpp::WorldRenderer* worldRenderer = nullptr;
 mcpp::Player* player = nullptr;
+
+mcpp::FrustumIntersection frustum = mcpp::FrustumIntersection();
 
 unsigned int frames = 0;
 
@@ -307,7 +310,7 @@ void moveCameraToPlayer(double partialTick) {
     viewMat.translate(0.0f, 0.0f, -0.3f)
         .rotateX(-player->pitch)
         .rotateY(-player->yaw)
-        .translate(-lerpPos.x, -lerpPos.y, -lerpPos.z);
+        .translate(-lerpPos.x, -lerpPos.y - player->eyeHeight, -lerpPos.z);
 }
 
 void setupCamera(double partialTick) {
@@ -318,6 +321,9 @@ void setupCamera(double partialTick) {
 
 void render(double partialTick) {
     setupCamera(partialTick);
+    auto m = mcpp::Matrix4f();
+    frustum.set(projectionMat.mul(viewMat, m));
+    worldRenderer->pick();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     worldRenderer->updateDirtyChunks();
@@ -405,7 +411,9 @@ int WINAPI WinMain(
         ++frames;
         while (glfwGetTime() >= lastTime + 1.0)
         {
+#ifdef _DEBUG
             std::cout << "FPS: " << frames << "\n";;
+#endif // _DEBUG
             ::frames = frames;
             lastTime += 1.0;
             frames = 0;

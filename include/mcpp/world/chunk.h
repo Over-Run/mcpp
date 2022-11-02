@@ -1,5 +1,5 @@
 #pragma once
-#include "mcpp/vector.h"
+#include "mcpp/math/vector.h"
 
 namespace mcpp {
     static constexpr int CHUNK_SIZE = 32;

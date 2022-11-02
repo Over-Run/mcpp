@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "mcpp/world/entity/player.h"
 
-mcpp::Player::Player(World* world) : Entity(world) {}
+mcpp::Player::Player(World* world) : Entity(world) {
+    eyeHeight = 1.62f;
+}
 
 void mcpp::Player::tick() {
     Entity::tick();
@@ -16,14 +18,6 @@ void mcpp::Player::tick() {
     {
         ++xo;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
-    {
-        --yo;
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE))
-    {
-        ++yo;
-    }
     if (glfwGetKey(window, GLFW_KEY_W))
     {
         --zo;
@@ -32,12 +26,13 @@ void mcpp::Player::tick() {
     {
         ++zo;
     }
+    if (glfwGetKey(window, GLFW_KEY_SPACE))
+    {
+        velocity.y = 0.5f;
+    }
     moveRelative(xo, zo, onGround ? 0.1f : 0.02f);
-    // yd -= 0.08
-    // todo replace this below with move(velocity)
-    position += velocity;
-    // todo remove this
-    position.y += yo * 0.15f;
+    velocity.y -= 0.08f;
+    move(velocity);
     velocity.x *= 0.91f;
     velocity.y *= 0.98f;
     velocity.z *= 0.91f;

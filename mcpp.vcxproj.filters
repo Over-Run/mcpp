@@ -69,6 +69,9 @@
     <ClCompile Include="src\math\aabb.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
+    <ClCompile Include="src\math\rayaab_intersection.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -111,6 +114,12 @@
       <Filter>Header Files\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\mcpp\math\vector.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\rayaab_intersection.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mcpp\math\frustum.h">
       <Filter>Header Files\Math</Filter>
     </ClInclude>
   </ItemGroup>
