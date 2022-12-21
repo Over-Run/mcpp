@@ -48,6 +48,11 @@ jobs:
         fileName: "glfw3.dll"
         out-file-path: "lib/x64"
 
+    - name: Cache GLFW binaries
+      uses: actions/cache@v3
+      with:
+        path: ~/lib/x64
+
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -59,5 +64,5 @@ jobs:
       with:
         name: mcpp
         path: |
-          x64/Release/*/mcpp.exe
-          lib/x64/*/glfw3.dll
+          x64/*/mcpp.exe
+          lib/*/glfw3.dll
