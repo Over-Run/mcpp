@@ -5,6 +5,7 @@
 namespace mcpp {
     enum class GLUniformType : unsigned char {
         I1,
+        F4,
         M4F
     };
 
@@ -24,8 +25,9 @@ namespace mcpp {
 
         int getLocation() const;
         void set(int value);
+        void set(float x, float y, float z, float w);
         void set(const mcpp::Matrix4f& value);
-        void upload();
+        void upload(unsigned int program);
     };
 
     class GLProgram {

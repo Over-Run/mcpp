@@ -1,4 +1,5 @@
 #pragma once
+#include "vector.h"
 
 namespace mcpp {
     template<typename T>
@@ -302,6 +303,10 @@ namespace mcpp {
             return rotateTowardsXY(sin, cos);
         }
 
+        Vector3f& positiveZGeneric(Vector3f& dir) const {
+            return dir.set(m10 * m21 - m11 * m20, m20 * m01 - m21 * m00, m00 * m11 - m01 * m10).normalize();
+        }
+
     public:
         Matrix4& set(const Matrix4& m) {
             m00 = m.m00;
@@ -324,7 +329,7 @@ namespace mcpp {
             return *this;
         }
 
-        Matrix4& mulTranslationAffine(const Matrix4& right, Matrix4& dest) {
+        Matrix4& mulTranslationAffine(const Matrix4& right, Matrix4& dest) const {
             dest.m00 = right.m00;
             dest.m01 = right.m01;
             dest.m02 = right.m02;
@@ -345,7 +350,7 @@ namespace mcpp {
             return dest;
         }
 
-        Matrix4& mulAffine(const Matrix4& right, Matrix4& dest) {
+        Matrix4& mulAffine(const Matrix4& right, Matrix4& dest) const {
             T m00 = Matrix4::m00, m01 = Matrix4::m01, m02 = Matrix4::m02;
             T m10 = Matrix4::m10, m11 = Matrix4::m11, m12 = Matrix4::m12;
             T m20 = Matrix4::m20, m21 = Matrix4::m21, m22 = Matrix4::m22;
@@ -373,7 +378,7 @@ namespace mcpp {
             return dest;
         }
 
-        Matrix4& mulPerspectiveAffine(const Matrix4& view, Matrix4& dest) {
+        Matrix4& mulPerspectiveAffine(const Matrix4& view, Matrix4& dest) const {
             T nm00 = m00 * view.m00, nm01 = m11 * view.m01, nm02 = m22 * view.m02, nm03 = m23 * view.m02;
             T nm10 = m00 * view.m10, nm11 = m11 * view.m11, nm12 = m22 * view.m12, nm13 = m23 * view.m12;
             T nm20 = m00 * view.m20, nm21 = m11 * view.m21, nm22 = m22 * view.m22, nm23 = m23 * view.m22;
@@ -386,10 +391,84 @@ namespace mcpp {
             return dest;
         }
 
-        Matrix4& mul(const Matrix4& right, Matrix4& dest) {
+        Matrix4& mulAffineR(const Matrix4& right, Matrix4& dest) const {
+            T nm00 = fma(m00, right.m00, fma(m10, right.m01, m20 * right.m02));
+            T nm01 = fma(m01, right.m00, fma(m11, right.m01, m21 * right.m02));
+            T nm02 = fma(m02, right.m00, fma(m12, right.m01, m22 * right.m02));
+            T nm03 = fma(m03, right.m00, fma(m13, right.m01, m23 * right.m02));
+            T nm10 = fma(m00, right.m10, fma(m10, right.m11, m20 * right.m12));
+            T nm11 = fma(m01, right.m10, fma(m11, right.m11, m21 * right.m12));
+            T nm12 = fma(m02, right.m10, fma(m12, right.m11, m22 * right.m12));
+            T nm13 = fma(m03, right.m10, fma(m13, right.m11, m23 * right.m12));
+            T nm20 = fma(m00, right.m20, fma(m10, right.m21, m20 * right.m22));
+            T nm21 = fma(m01, right.m20, fma(m11, right.m21, m21 * right.m22));
+            T nm22 = fma(m02, right.m20, fma(m12, right.m21, m22 * right.m22));
+            T nm23 = fma(m03, right.m20, fma(m13, right.m21, m23 * right.m22));
+            T nm30 = fma(m00, right.m30, fma(m10, right.m31, fma(m20, right.m32, m30)));
+            T nm31 = fma(m01, right.m30, fma(m11, right.m31, fma(m21, right.m32, m31)));
+            T nm32 = fma(m02, right.m30, fma(m12, right.m31, fma(m22, right.m32, m32)));
+            T nm33 = fma(m03, right.m30, fma(m13, right.m31, fma(m23, right.m32, m33)));
+            dest.m00 = nm00;
+            dest.m01 = nm01;
+            dest.m02 = nm02;
+            dest.m03 = nm03;
+            dest.m10 = nm10;
+            dest.m11 = nm11;
+            dest.m12 = nm12;
+            dest.m13 = nm13;
+            dest.m20 = nm20;
+            dest.m21 = nm21;
+            dest.m22 = nm22;
+            dest.m23 = nm23;
+            dest.m30 = nm30;
+            dest.m31 = nm31;
+            dest.m32 = nm32;
+            dest.m33 = nm33;
+            dest.properties = properties & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL);
+            return dest;
+        }
+
+        Matrix4& mul0(const Matrix4& right, Matrix4& dest) const {
+            T nm00 = fma(m00, right.m00, fma(m10, right.m01, fma(m20, right.m02, m30 * right.m03)));
+            T nm01 = fma(m01, right.m00, fma(m11, right.m01, fma(m21, right.m02, m31 * right.m03)));
+            T nm02 = fma(m02, right.m00, fma(m12, right.m01, fma(m22, right.m02, m32 * right.m03)));
+            T nm03 = fma(m03, right.m00, fma(m13, right.m01, fma(m23, right.m02, m33 * right.m03)));
+            T nm10 = fma(m00, right.m10, fma(m10, right.m11, fma(m20, right.m12, m30 * right.m13)));
+            T nm11 = fma(m01, right.m10, fma(m11, right.m11, fma(m21, right.m12, m31 * right.m13)));
+            T nm12 = fma(m02, right.m10, fma(m12, right.m11, fma(m22, right.m12, m32 * right.m13)));
+            T nm13 = fma(m03, right.m10, fma(m13, right.m11, fma(m23, right.m12, m33 * right.m13)));
+            T nm20 = fma(m00, right.m20, fma(m10, right.m21, fma(m20, right.m22, m30 * right.m23)));
+            T nm21 = fma(m01, right.m20, fma(m11, right.m21, fma(m21, right.m22, m31 * right.m23)));
+            T nm22 = fma(m02, right.m20, fma(m12, right.m21, fma(m22, right.m22, m32 * right.m23)));
+            T nm23 = fma(m03, right.m20, fma(m13, right.m21, fma(m23, right.m22, m33 * right.m23)));
+            T nm30 = fma(m00, right.m30, fma(m10, right.m31, fma(m20, right.m32, m30 * right.m33)));
+            T nm31 = fma(m01, right.m30, fma(m11, right.m31, fma(m21, right.m32, m31 * right.m33)));
+            T nm32 = fma(m02, right.m30, fma(m12, right.m31, fma(m22, right.m32, m32 * right.m33)));
+            T nm33 = fma(m03, right.m30, fma(m13, right.m31, fma(m23, right.m32, m33 * right.m33)));
+            dest.m00 = nm00;
+            dest.m01 = nm01;
+            dest.m02 = nm02;
+            dest.m03 = nm03;
+            dest.m10 = nm10;
+            dest.m11 = nm11;
+            dest.m12 = nm12;
+            dest.m13 = nm13;
+            dest.m20 = nm20;
+            dest.m21 = nm21;
+            dest.m22 = nm22;
+            dest.m23 = nm23;
+            dest.m30 = nm30;
+            dest.m31 = nm31;
+            dest.m32 = nm32;
+            dest.m33 = nm33;
+            dest.properties = 0;
+            return dest;
+        }
+
+        Matrix4& mul(const Matrix4& right, Matrix4& dest) const {
             if ((properties & PROPERTY_IDENTITY) != 0)
                 return dest.set(right);
-            else if ((right.properties() & PROPERTY_IDENTITY) != 0)
+            else if ((right.properties & PROPERTY_IDENTITY) != 0)
                 return dest.set(*this);
             else if ((properties & PROPERTY_TRANSLATION) != 0 && (right.properties & PROPERTY_AFFINE) != 0)
                 return mulTranslationAffine(right, dest);
@@ -583,6 +662,16 @@ namespace mcpp {
             m03 = nm03;
             properties = properties & ~(PROPERTY_PERSPECTIVE | PROPERTY_IDENTITY | PROPERTY_TRANSLATION);
             return *this;
+        }
+
+        Vector3f& normalizedPositiveZ(Vector3f& dir) const {
+            return dir.set(m02, m12, m22);
+        }
+
+        Vector3f& positiveZ(Vector3f& dir) const {
+            if ((properties & PROPERTY_ORTHONORMAL) != 0)
+                return normalizedPositiveZ(dir);
+            return positiveZGeneric(dir);
         }
     };
 

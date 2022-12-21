@@ -44,7 +44,7 @@ void mcpp::ClientChunk::rebuild() {
             }
         }
     }
-    t.end(vao, vbo, ebo, &vaVertex, &vaColor, &vaTexCoord, &bufferSize, &indicesSize);
+    t.end(vao, vbo, ebo, &vaVertex, &vaColor, &vaTexCoord, &bufferSize, &indicesSize, GL_DYNAMIC_DRAW);
 }
 
 void mcpp::ClientChunk::render() {

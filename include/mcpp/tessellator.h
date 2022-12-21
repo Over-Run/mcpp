@@ -34,6 +34,6 @@ namespace mcpp {
         /// @param indicesSize[in,out,notnull] the old indices size
         void end(unsigned int vao, unsigned int vbo, unsigned int ebo,
             bool* vaVertex, bool* vaColor, bool* vaTexCoord,
-            size_t* bufferSize, size_t* indicesSize);
+            size_t* bufferSize, size_t* indicesSize, unsigned int usage = GL_STREAM_DRAW);
     };
 }

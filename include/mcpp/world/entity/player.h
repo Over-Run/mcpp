@@ -2,9 +2,9 @@
 #include "entity.h"
 
 namespace mcpp {
-    class Player : public Entity {
+    class PlayerEntity : public Entity {
     public:
-        Player(World* world);
+        PlayerEntity(World* world);
 
         virtual void tick() override;
     };

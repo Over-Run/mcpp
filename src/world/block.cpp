@@ -10,7 +10,12 @@ unsigned char mcpp::Block::getTexture(Direction face) {
     return id;
 }
 
+mcpp::AABBox& mcpp::Block::getOutlineShape(AABBox& box) {
+    return getCollisionShape(box);
+}
+
 mcpp::AABBox& mcpp::Block::getCollisionShape(AABBox& box) {
+    box.isInvalid = false;
     return box.set(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 }
 
@@ -26,8 +31,13 @@ void mcpp::Block::renderFace(Tessellator& t, World* world, Direction face, int x
     float x0 = x + 0.0f, y0 = y + 0.0f, z0 = z + 0.0f;
     float x1 = x + 1.0f, y1 = y + 1.0f, z1 = z + 1.0f;
     float u0 = 0.0f, v0 = 0.0f, u1 = 0.0f, v1 = 0.0f;
+    TextureRegion region = TextureRegion();
     unsigned char texture = getTexture(face);
-    texture::atlasUV((texture % 16) * 16, (texture / 16) * 16, 16, 16, &u0, &v0, &u1, &v1);
+    texture::atlasUV((texture % 16) * 16, (texture / 16) * 16, 16, 16, region);
+    u0 = region.u0;
+    v0 = region.v0;
+    u1 = region.u1;
+    v1 = region.v1;
     t.index({ 0, 1, 2, 2, 3, 0 });
     switch (face)
     {

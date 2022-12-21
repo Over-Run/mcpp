@@ -1,32 +1,31 @@
 #include "stdafx.h"
+#include "mcpp/input.h"
 #include "mcpp/world/entity/player.h"
 
-mcpp::Player::Player(World* world) : Entity(world) {
+mcpp::PlayerEntity::PlayerEntity(World* world) : Entity(world) {
     eyeHeight = 1.62f;
 }
 
-void mcpp::Player::tick() {
+void mcpp::PlayerEntity::tick() {
     Entity::tick();
     float xo = 0.0f, yo = 0.0f, zo = 0.0f;
-    // TODO: Replace this with keyboard::isKeyDown
-    GLFWwindow* window = glfwGetCurrentContext();
-    if (glfwGetKey(window, GLFW_KEY_A))
+    if (mcpp::window->getKey(GLFW_KEY_A))
     {
         --xo;
     }
-    if (glfwGetKey(window, GLFW_KEY_D))
+    if (mcpp::window->getKey(GLFW_KEY_D))
     {
         ++xo;
     }
-    if (glfwGetKey(window, GLFW_KEY_W))
+    if (mcpp::window->getKey(GLFW_KEY_W))
     {
         --zo;
     }
-    if (glfwGetKey(window, GLFW_KEY_S))
+    if (mcpp::window->getKey(GLFW_KEY_S))
     {
         ++zo;
     }
-    if (glfwGetKey(window, GLFW_KEY_SPACE))
+    if (mcpp::window->getKey(GLFW_KEY_SPACE))
     {
         velocity.y = 0.5f;
     }

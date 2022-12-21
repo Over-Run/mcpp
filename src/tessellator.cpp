@@ -78,13 +78,13 @@ void mcpp::Tessellator::emit() {
 
 void mcpp::Tessellator::end(unsigned int vao, unsigned int vbo, unsigned int ebo,
     bool* vaVertex, bool* vaColor, bool* vaTexCoord,
-    size_t* bufferSize, size_t* indicesSize) {
+    size_t* bufferSize, size_t* indicesSize, unsigned int usage) {
     bool noVbo = !glIsBuffer(vbo), noEbo = !glIsBuffer(ebo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     if (noVbo || (bufferSize == nullptr) || (*bufferSize < pos))
     {
         if (bufferSize) { *bufferSize = pos; }
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pos, buffer.data(), GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pos, buffer.data(), usage);
     }
     else
     {
@@ -93,17 +93,19 @@ void mcpp::Tessellator::end(unsigned int vao, unsigned int vbo, unsigned int ebo
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    GLsizeiptr eboSize = 0;
+    glGetBufferParameteri64v(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &eboSize);
     const auto& indexData = indices.data();
     size_t _sz_indices = indices.size();
-    if (noEbo || (*indicesSize < _sz_indices))
+    if (noEbo || (static_cast<size_t>(eboSize) < _sz_indices))
     {
-        *indicesSize = _sz_indices;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * _sz_indices, indexData, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * _sz_indices, indexData, usage);
     }
     else
     {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0LL, sizeof(int) * _sz_indices, indexData);
     }
+    *indicesSize = _sz_indices;
 
     if ((vaVertex && !(*vaVertex)) || (vaVertex == nullptr))
     {

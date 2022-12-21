@@ -4,19 +4,19 @@
 #include "mcpp/math/frustum.h"
 #include "mcpp/tessellator.h"
 #include "mcpp/texture.h"
+#include "mcpp/input.h"
 #include "mcpp/world/block.h"
 #include "mcpp/world/chunk.h"
 #include "mcpp/world/entity/player.h"
 #include "mcpp/world/world.h"
 #include "mcpp/world/world_renderer.h"
 
-GLFWwindow* window = NULL;
 int width = 0, height = 0;
+
 mcpp::GLProgram* program = nullptr;
 unsigned int vao = 0, vbo = 0, ebo = 0;
 size_t bufferSize = 0, indicesSize = 0;
 bool vaVertex = false, vaColor = false, vaTexCoord = false;
-unsigned int terrainAtlas = 0;
 
 constexpr auto MOUSE_SENSITIVITY = 0.15f;
 double deltaMouseX = 0.0, deltaMouseY = 0.0;
@@ -25,15 +25,18 @@ bool cameraMoving = false;
 
 mcpp::Matrix4f projectionMat = mcpp::Matrix4f();
 mcpp::Matrix4f viewMat = mcpp::Matrix4f();
+mcpp::Matrix4f projectionViewMat = mcpp::Matrix4f();
 mcpp::Matrix4f modelMat = mcpp::Matrix4f();
 
 mcpp::World* world = nullptr;
 mcpp::WorldRenderer* worldRenderer = nullptr;
-mcpp::Player* player = nullptr;
+mcpp::PlayerEntity* player = nullptr;
 
 mcpp::FrustumIntersection frustum = mcpp::FrustumIntersection();
 
-unsigned int frames = 0;
+mcpp::BlockHitResult hitResult = mcpp::BlockHitResult();
+
+unsigned int framesPerSecond = 0;
 
 class Timer {
 public:
@@ -81,10 +84,10 @@ in vec2 UV0;
 out vec3 vertexColor;
 out vec2 texCoord0;
 
-uniform mat4 ProjectionMat, ViewMat, ModelMat;
+uniform mat4 ProjectionViewMat, ModelMat;
 
 void main() {
-    gl_Position = ProjectionMat * ViewMat * ModelMat * vec4(Position, 1.0);
+    gl_Position = ProjectionViewMat * ModelMat * vec4(Position, 1.0);
     vertexColor = Color;
     texCoord0 = UV0;
 }
@@ -97,10 +100,11 @@ in vec2 texCoord0;
 
 out vec4 FragColor;
 
+uniform vec4 ColorModulator;
 uniform sampler2D Sampler0;
 
 void main() {
-    FragColor = vec4(vertexColor, 1.0) * texture(Sampler0, texCoord0);
+    FragColor = vec4(vertexColor, 1.0) * ColorModulator * texture(Sampler0, texCoord0);
 }
 )glsl";
 
@@ -198,21 +202,20 @@ bool initProgram() {
     glDeleteShader(vsh);
     glDeleteShader(fsh);
 
-    program->use();
+    program->findUniform("ColorModulator", mcpp::GLUniformType::F4)->set(1.0f, 1.0f, 1.0f, 1.0f);
     program->findUniform("Sampler0", mcpp::GLUniformType::I1)->set(0);
-    glUseProgram(0);
 
     return true;
 }
 
 bool init() {
     int fbWidth = 0, fbHeight = 0;
-    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-    onResize(window, fbWidth, fbHeight);
+    mcpp::window->getFramebufferSize(&fbWidth, &fbHeight);
+    onResize(mcpp::window->handle(), fbWidth, fbHeight);
 
     if (glfwRawMouseMotionSupported())
     {
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        mcpp::window->setInputMode(GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
     glClearColor(0.4f, 0.6f, 0.9f, 1.0f);
@@ -248,12 +251,21 @@ bool init() {
                     std::cerr << "Failed to load the terrain atlas. Reason: " << stbi_failure_reason() << std::endl;
                     return false;
                 }
+                unsigned int terrainAtlas = 0;
                 glGenTextures(1, &terrainAtlas);
+                mcpp::texture::putTexture2D(mcpp::texture::TERRAIN_ATLAS, terrainAtlas);
                 mcpp::texture::bind2D(0, terrainAtlas);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pw, ph, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+                int w = pw, h = ph;
+                for (int i = 0; i < 5; i++)
+                {
+                    glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                    w = max(w / 2, 1);
+                    h = max(h / 2, 1);
+                }
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pw, ph, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
                 stbi_image_free(pixels);
                 glGenerateMipmap(GL_TEXTURE_2D);
                 mcpp::texture::bind2D(0, 0);
@@ -286,7 +298,7 @@ bool init() {
             }
         }
     }
-    player = new mcpp::Player(world);
+    player = new mcpp::PlayerEntity(world);
 
     return true;
 }
@@ -319,26 +331,65 @@ void setupCamera(double partialTick) {
     moveCameraToPlayer(partialTick);
 }
 
+void renderHit() {
+    if (hitResult.missing) return;
+
+    program->findUniform("ColorModulator", mcpp::GLUniformType::F4)->set(1.0f, 1.0f, 1.0f, (float)(sin(glfwGetTime()) + 1.0f) * 0.5f);
+    program->uploadUniforms();
+
+    mcpp::AABBox box = mcpp::AABBox();
+    mcpp::Block* block = world->getBlock(hitResult.x, hitResult.y, hitResult.z);
+    block->getOutlineShape(box).move((float)hitResult.x, (float)hitResult.y, (float)hitResult.z);
+
+    auto& t = mcpp::Tessellator::getInstance();
+    t.begin();
+    t.color(1,1,1);
+    t.index({
+            // -x
+            0, 1, 0, 2, 1, 3, 2, 3,
+            // +x
+            4, 5, 4, 6, 5, 7, 6, 7,
+            // -y
+            0, 4, 1, 5,
+            // +y
+            2, 6, 3, 7
+        });
+    t.vertex(box.minX, box.minY, box.minZ).emit();
+    t.vertex(box.minX, box.minY, box.maxZ).emit();
+    t.vertex(box.minX, box.maxY, box.minZ).emit();
+    t.vertex(box.minX, box.maxY, box.maxZ).emit();
+    t.vertex(box.maxX, box.minY, box.minZ).emit();
+    t.vertex(box.maxX, box.minY, box.maxZ).emit();
+    t.vertex(box.maxX, box.maxY, box.minZ).emit();
+    t.vertex(box.maxX, box.maxY, box.maxZ).emit();
+    t.end(vao, vbo, ebo, &vaVertex, &vaColor, &vaTexCoord, &bufferSize, &indicesSize);
+    glLineWidth(2.0f);
+    glBindVertexArray(vao);
+    glDrawElements(GL_LINES, (GLsizei)indicesSize, GL_UNSIGNED_INT, (void*)0);
+    glBindVertexArray(0);
+    glLineWidth(1.0f);
+
+    program->findUniform("ColorModulator", mcpp::GLUniformType::F4)->set(1.0f, 1.0f, 1.0f, 1.0f);
+    program->uploadUniforms();
+}
+
 void render(double partialTick) {
     setupCamera(partialTick);
-    auto m = mcpp::Matrix4f();
-    frustum.set(projectionMat.mul(viewMat, m));
-    worldRenderer->pick();
+    frustum.set(projectionMat.mul(viewMat, projectionViewMat));
+    worldRenderer->pick(frustum, projectionViewMat, player, hitResult);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    worldRenderer->updateDirtyChunks();
+    worldRenderer->updateDirtyChunks(frustum);
 
     program->use();
-    program->findUniform("ProjectionMat", mcpp::GLUniformType::M4F)->set(projectionMat);
-    program->findUniform("ViewMat", mcpp::GLUniformType::M4F)->set(viewMat);
+    program->findUniform("ProjectionViewMat", mcpp::GLUniformType::M4F)->set(projectionViewMat);
     program->findUniform("ModelMat", mcpp::GLUniformType::M4F)->set(modelMat);
     program->uploadUniforms();
-    mcpp::texture::bind2D(0, terrainAtlas);
-    worldRenderer->render();
-    mcpp::texture::bind2D(0, 0);
+    worldRenderer->render(frustum);
+    renderHit();
     glUseProgram(0);
 
-    glfwSwapBuffers(window);
+    mcpp::window->swapBuffers();
 }
 
 void dispose() {
@@ -354,12 +405,12 @@ void dispose() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
-    glDeleteTextures(1, &terrainAtlas);
+    mcpp::texture::deleteTextures2D();
 }
 
 #ifdef _DEBUG
 int main()
-#else // _DEBUG
+#elif defined(_WIN32) // _DEBUG
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -377,34 +428,35 @@ int WINAPI WinMain(
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(854, 480, "Minecraft++  Press ~ to toggle camera", NULL, NULL);
-    if (window == NULL)
+    mcpp::window = new mcpp::Window(854, 480, "Minecraft++  Press ~ to toggle camera");
+    if (mcpp::window->handle() == NULL)
     {
         std::cerr << "Failed to create the GLFW window\n";
         return 0;
     }
-    glfwSetKeyCallback(window, onKey);
-    glfwSetFramebufferSizeCallback(window, onResize);
-    glfwSetCursorPosCallback(window, onCursorPos);
+    mcpp::window->setKeyCallback(onKey);
+    mcpp::window->setFramebufferSizeCallback(onResize);
+    mcpp::window->setCursorPosCallback(onCursorPos);
     const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     if (vidmode != NULL)
     {
         int w = 0, h = 0;
-        glfwGetWindowSize(window, &w, &h);
-        glfwSetWindowPos(window,
+        mcpp::window->getSize(&w, &h);
+        mcpp::window->setPos(
             (vidmode->width - w) / 2,
-            (vidmode->height - h) / 2);
+            (vidmode->height - h) / 2
+        );
     }
-    glfwMakeContextCurrent(window);
+    mcpp::window->makeContextCurrent();
     gladLoadGL(glfwGetProcAddress);
     if (!init())
     {
         return 0;
     }
-    glfwShowWindow(window);
+    mcpp::window->show();
     unsigned int frames = 0;
     double lastTime = glfwGetTime();
-    while (!glfwWindowShouldClose(window))
+    while (!mcpp::window->shouldClose())
     {
         update();
         render(gameTimer.partialTick);
@@ -414,13 +466,14 @@ int WINAPI WinMain(
 #ifdef _DEBUG
             std::cout << "FPS: " << frames << "\n";;
 #endif // _DEBUG
-            ::frames = frames;
+            framesPerSecond = frames;
             lastTime += 1.0;
             frames = 0;
         }
     }
     dispose();
-    glfwDestroyWindow(window);
+    delete mcpp::window;
+    mcpp::window = nullptr;
     glfwTerminate();
     return 0;
 }

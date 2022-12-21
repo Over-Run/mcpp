@@ -5,6 +5,10 @@ mcpp::RayAabIntersection::RayAabIntersection(float originX, float originY, float
     set(originX, originY, originZ, dirX, dirY, dirZ);
 }
 
+mcpp::RayAabIntersection::RayAabIntersection(const Vector3f& origin, const Vector3f& dir) :
+    RayAabIntersection(origin.x, origin.y, origin.z, dir.x, dir.y, dir.z) {
+}
+
 void mcpp::RayAabIntersection::set(float _originX, float _originY, float _originZ, float _dirX, float _dirY, float _dirZ) {
     originX = _originX;
     originY = _originY;
@@ -99,6 +103,10 @@ bool mcpp::RayAabIntersection::test(float minX, float minY, float minZ, float ma
     default:
         return false;
     }
+}
+
+bool mcpp::RayAabIntersection::test(const AABBox& box) {
+    return test(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
 }
 
 void mcpp::RayAabIntersection::precomputeSlope() {

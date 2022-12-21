@@ -1,5 +1,6 @@
 #pragma once
-#include "stdafx.h"
+#include "aabb.h"
+#include "vector.h"
 
 namespace mcpp {
     class RayAabIntersection {
@@ -12,7 +13,7 @@ namespace mcpp {
         float s_xy, s_yx, s_zy, s_yz, s_xz, s_zx;
         char classification;
 
-        inline static int signum(float f) {
+        inline static constexpr int signum(float f) {
             return (f == 0.0f || isnan(f)) ? 0 : (f < 0.0f ? -1 : 1);
         }
 
@@ -47,8 +48,10 @@ namespace mcpp {
     public:
         RayAabIntersection() = default;
         RayAabIntersection(float originX, float originY, float originZ, float dirX, float dirY, float dirZ);
+        RayAabIntersection(const Vector3f& origin, const Vector3f& dir);
 
         void set(float originX, float originY, float originZ, float dirX, float dirY, float dirZ);
         bool test(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
+        bool test(const AABBox& box);
     };
 }

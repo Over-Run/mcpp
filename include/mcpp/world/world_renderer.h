@@ -3,6 +3,15 @@
 
 namespace mcpp {
     class ClientChunk;
+    class PlayerEntity;
+
+    struct BlockHitResult {
+    public:
+        bool missing;
+        Direction face;
+        int x, y, z;
+        Block* block;
+    };
 
     class WorldRenderer : public IWorldListener {
     private:
@@ -17,9 +26,10 @@ namespace mcpp {
         WorldRenderer(World* world);
         ~WorldRenderer();
 
-        void pick();
-        void updateDirtyChunks();
-        void render();
+        void pick(const FrustumIntersection& frustum, const Matrix4f& projViewMat,
+            PlayerEntity* player, BlockHitResult& hitResult);
+        void updateDirtyChunks(const FrustumIntersection& frustum);
+        void render(const FrustumIntersection& frustum);
 
         virtual void onBlockChanged(int x, int y, int z) override;
         virtual void allChanged() override;

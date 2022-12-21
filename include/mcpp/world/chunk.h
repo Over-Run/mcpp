@@ -12,8 +12,10 @@ namespace mcpp {
         bool dirty;
         bool vaVertex, vaColor, vaTexCoord;
         unsigned int vao, vbo, ebo;
+    public:
         const int x0, y0, z0;
         const int x1, y1, z1;
+    private:
         size_t bufferSize, indicesSize;
         const Vector3f position;
         World* const world;

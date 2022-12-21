@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "aabb.h"
 #include "matrix.h"
 #include "vector.h"
 
@@ -72,7 +73,7 @@ namespace mcpp {
             return *this;
         }
 
-        bool testAab(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        bool testAab(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) const {
             /*
              * This is an implementation of the "2.4 Basic intersection test" of the mentioned site.
              * It does not distinguish between partially inside and fully inside, though, so the test with the 'p' vertex is omitted.
@@ -83,6 +84,10 @@ namespace mcpp {
                 pyX * (pyX < 0 ? minX : maxX) + pyY * (pyY < 0 ? minY : maxY) + pyZ * (pyZ < 0 ? minZ : maxZ) >= -pyW &&
                 nzX * (nzX < 0 ? minX : maxX) + nzY * (nzY < 0 ? minY : maxY) + nzZ * (nzZ < 0 ? minZ : maxZ) >= -nzW &&
                 pzX * (pzX < 0 ? minX : maxX) + pzY * (pzY < 0 ? minY : maxY) + pzZ * (pzZ < 0 ? minZ : maxZ) >= -pzW;
+        }
+
+        bool testAab(AABBox& box) const {
+            return testAab(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
         }
     };
 }

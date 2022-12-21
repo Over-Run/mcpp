@@ -64,12 +64,35 @@ namespace mcpp {
             return *this;
         }
 
+        T distanceSqr(T _x, T _y, T _z) const {
+            return x * _x + y * _y + z * _z;
+        }
+
         T distanceSqr(const Vector3& other) const {
-            return x * other.x + y * other.y + z * other.z;
+            return distanceSqr(other.x, other.y, other.z);
+        }
+
+        double distance(T _x, T _y, T _z) const {
+            return sqrt(distanceSqr(_x, _y, _z));
         }
 
         double distance(const Vector3& other) const {
-            return sqrt((double)(x * other.x + y * other.y + z * other.z));
+            return distance(other.x, other.y, other.z);
+        }
+
+        Vector3& negate() {
+            x = -x;
+            y = -y;
+            z = -z;
+            return *this;
+        }
+
+        Vector3& normalize() {
+            T mag = (T)1.0 / sqrt(x * x + y * y + z * z);
+            x *= mag;
+            y *= mag;
+            z *= mag;
+            return *this;
         }
     };
 
@@ -151,7 +174,24 @@ namespace mcpp {
         }
 
         double distance(const Vector4& other) const {
-            return sqrt((double)(x * other.x + y * other.y + z * other.z + w * other.w));
+            return sqrt(x * other.x + y * other.y + z * other.z + w * other.w);
+        }
+
+        Vector4& negate() {
+            x = -x;
+            y = -y;
+            z = -z;
+            w = -w;
+            return this;
+        }
+
+        Vector4& normalize() {
+            T mag = (T)1.0 / sqrt(x * x + y * y + z * z + w * w);
+            x *= mag;
+            y *= mag;
+            z *= mag;
+            w *= mag;
+            return *this;
         }
     };
 

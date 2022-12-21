@@ -149,8 +149,10 @@
   <ItemGroup>
     <ClCompile Include="src\ext_lib_impl.cpp" />
     <ClCompile Include="src\glprogram.cpp" />
+    <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\math\aabb.cpp" />
+    <ClCompile Include="src\math\intersection.cpp" />
     <ClCompile Include="src\math\rayaab_intersection.cpp" />
     <ClCompile Include="src\tessellator.cpp" />
     <ClCompile Include="src\texture.cpp" />
@@ -163,8 +165,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\mcpp\glprogram.h" />
+    <ClInclude Include="include\mcpp\input.h" />
     <ClInclude Include="include\mcpp\math\aabb.h" />
     <ClInclude Include="include\mcpp\math\frustum.h" />
+    <ClInclude Include="include\mcpp\math\intersection.h" />
     <ClInclude Include="include\mcpp\math\math_util.h" />
     <ClInclude Include="include\mcpp\math\matrix.h" />
     <ClInclude Include="include\mcpp\math\rayaab_intersection.h" />

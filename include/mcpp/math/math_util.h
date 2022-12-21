@@ -84,7 +84,7 @@ namespace mcpp {
 
         template<typename T, typename T_delta>
         inline T_delta lerp(T x0, T x1, T_delta delta) {
-            return (T_delta)(x0 + (x1 - x0) * delta);
+            return (T_delta)((T_delta)x0 + (x1 - x0) * delta);
         }
 
         inline constexpr float toRadians(float deg) {

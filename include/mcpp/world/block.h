@@ -19,6 +19,7 @@ namespace mcpp {
 
         virtual unsigned char getTexture(Direction face);
 
+        virtual AABBox& getOutlineShape(AABBox& box);
         virtual AABBox& getCollisionShape(AABBox& box);
 
         virtual bool hasSideTransparency(Direction face);
@@ -49,10 +50,10 @@ namespace mcpp {
     };
 
     namespace Blocks {
-        static auto AIR = new AirBlock(0);
-        static auto GRASS_BLOCK = new GrassBlock(1);
-        static auto COBBLESTONE = new Block(2);
-        static auto DIRT = new Block(3);
+        static auto const AIR = new AirBlock(0);
+        static auto const GRASS_BLOCK = new GrassBlock(1);
+        static auto const COBBLESTONE = new Block(2);
+        static auto const DIRT = new Block(3);
 
         static Block* blockIds[] = {
             AIR, GRASS_BLOCK, COBBLESTONE, DIRT
