@@ -51,10 +51,10 @@ jobs:
     - name: Cache GLFW binaries
       uses: actions/cache@v3
       with:
-        key: glfw3dll
-        path: ~/lib/x64
+        key: glfw3dll.lib
+        path: ${{env.GITHUB_WORKSPACE}}/lib/x64
         restore-keys: |
-          glfw3
+          glfw3.dll
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -62,10 +62,15 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
 
+    - name: Copy productions to root directory
+      run: |
+        copy ${{env.GITHUB_WORKSPACE}}/x64/Release/mcpp.exe ${{env.GITHUB_WORKSPACE}}/mcpp.exe
+        copy ${{env.GITHUB_WORKSPACE}}/lib/x64/glfw3.dll ${{env.GITHUB_WORKSPACE}}/glfw3.dll
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: mcpp
         path: |
-          x64/*/mcpp.exe
-          lib/*/glfw3.dll
+          mcpp.exe
+          glfw3.dll
