@@ -52,7 +52,7 @@ jobs:
       uses: actions/cache@v3
       with:
         key: glfw3dll.lib
-        path: ${{env.GITHUB_WORKSPACE}}/lib/x64
+        path: lib/x64
         restore-keys: |
           glfw3.dll
 
@@ -64,8 +64,8 @@ jobs:
 
     - name: Copy productions to root directory
       run: |
-        copy ${{env.GITHUB_WORKSPACE}}/x64/Release/mcpp.exe ${{env.GITHUB_WORKSPACE}}/mcpp.exe
-        copy ${{env.GITHUB_WORKSPACE}}/lib/x64/glfw3.dll ${{env.GITHUB_WORKSPACE}}/glfw3.dll
+        copy x64/Release/mcpp.exe mcpp.exe
+        copy lib/x64/glfw3.dll glfw3.dll
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
