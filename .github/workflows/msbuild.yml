@@ -32,7 +32,15 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
+    - name: Cache GLFW binaries
+      id: cache-glfw-binaries
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-glfw3.3.8
+        path: lib/x64
+
     - name: Download GLFW DLL Lib
+      if: steps.cache-glfw-binaries.outputs.cache-hit != 'true'
       uses: robinraju/release-downloader@v1.7
       with:
         repository: "Over-Run/glfw-release"
@@ -41,20 +49,13 @@ jobs:
         out-file-path: "lib/x64"
 
     - name: Download GLFW DLL
+      if: steps.cache-glfw-binaries.outputs.cache-hit != 'true'
       uses: robinraju/release-downloader@v1.7
       with:
         repository: "Over-Run/glfw-release"
         tag: "v3.3.8"
         fileName: "glfw3.dll"
         out-file-path: "lib/x64"
-
-    - name: Cache GLFW binaries
-      uses: actions/cache@v3
-      with:
-        key: glfw3dll.lib
-        path: lib/x64
-        restore-keys: |
-          glfw3.dll
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
