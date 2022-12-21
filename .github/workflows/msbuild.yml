@@ -51,7 +51,10 @@ jobs:
     - name: Cache GLFW binaries
       uses: actions/cache@v3
       with:
+        key: glfw3dll
         path: ~/lib/x64
+        restore-keys: |
+          glfw3
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
